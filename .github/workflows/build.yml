@@ -82,7 +82,7 @@ jobs:
           cmake 
           -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} 
           -S "${{ github.workspace }}"
-          -B "${{ github.workspace }}/build/"
+          -B "${{ github.workspace }}\build"
 
       - name: Build
         run: cmake --build ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
