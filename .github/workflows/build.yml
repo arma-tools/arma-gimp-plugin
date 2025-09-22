@@ -24,7 +24,7 @@ jobs:
         sudo apt install -y pkg-config cmake
         sudo apt install -y software-properties-common
         sudo add-apt-repository -y ppa:ubuntuhandbook1/gimp-3
-        sudo apt install -y gimp libgimp-3.0-0 libgimp-3.0-dev
+        sudo apt install -y gimp libgimp-3.0-0 libgimp-3.0-dev libgexiv2-dev
 
     - name: Configure CMake
       run: >
@@ -37,4 +37,10 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Upload plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: arma-gimp-plugin
+        path: "${{ github.workspace }}/build/arma-gimp-plugin"
 
