@@ -55,11 +55,12 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2
         with:
+          msys2: CLANG64
           update: true
           install: >-
+            ${{env.MINGW_TRIPLET}}cmake
             ${{env.MINGW_TRIPLET}}clang
             ${{env.MINGW_TRIPLET}}glib2
-            ${{env.MINGW_TRIPLET}}cmake
             ${{env.MINGW_TRIPLET}}pkgconf
             ${{env.MINGW_TRIPLET}}gimp
 
@@ -68,6 +69,7 @@ jobs:
           submodules: recursive
 
       - name: Configure CMake
+        shell: msys2 {0}
         run: >
           cmake 
           -DCMAKE_BUILD_TYPE:STRING=${{env.BUILD_TYPE}} 
