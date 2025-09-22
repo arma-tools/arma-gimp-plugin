@@ -85,7 +85,7 @@ jobs:
           -B "${{ github.workspace }}/build/"
 
       - name: Build
-        run: cmake --build "${{github.workspace}}\build"--config ${{env.BUILD_TYPE}}
+        run: cmake --build ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
 
       - name: Upload plugin
         uses: actions/upload-artifact@v4
