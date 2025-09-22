@@ -59,6 +59,7 @@ jobs:
           update: true
           install: >-
             ${{env.MINGW_TRIPLET}}cmake
+            ${{env.MINGW_TRIPLET}}ninja
             ${{env.MINGW_TRIPLET}}clang
             ${{env.MINGW_TRIPLET}}glib2
             ${{env.MINGW_TRIPLET}}pkgconf
