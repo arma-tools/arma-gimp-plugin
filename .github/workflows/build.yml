@@ -66,8 +66,11 @@ jobs:
             glib2:p
             gimp:p
 
-      - env:
-          PKG_CONFIG_SYSROOT_DIR: ${{ steps.msys2.outputs.msys2-location }}/clang64
+      - name: Set pkg-config sysroot
+        run: echo "PKG_CONFIG_SYSROOT_DIR=${{ steps.msys2.outputs.msys2-location }}/clang64"
+
+      - name: Check PKG_CONFIG_SYSROOT_DIR
+        run: echo $PKG_CONFIG_SYSROOT_DIR
 
       - name: Install x86_64-pc-windows-gnu
         run: rustup target add x86_64-pc-windows-gnu
