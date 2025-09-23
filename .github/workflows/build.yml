@@ -95,5 +95,5 @@ jobs:
       - name: Upload plugin
         uses: actions/upload-artifact@v4
         with:
-          name: arma-gimp-plugin
+          name: arma-gimp-plugin.exe
           path: "${{ github.workspace }}/build/arma-gimp-plugin.exe"
