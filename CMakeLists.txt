@@ -8,7 +8,7 @@ add_subdirectory(arma-file-formats-cxx)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GIMP REQUIRED gimp-3.0 gimpui-3.0)
+pkg_check_modules(GIMP REQUIRED gimp-3.0 gimpui-3.0 glib-2.0)
 
 add_executable(arma-gimp-plugin main.cpp)
 
