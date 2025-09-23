@@ -61,7 +61,7 @@ jobs:
             toolchain:p
             cmake:p
             ninja:p
-            rust:p
+            rustup:p
             pkgconf:p
             glib2:p
             gimp:p
