@@ -67,7 +67,7 @@ jobs:
             gimp:p
 
       - name: Set pkg-config sysroot
-        run: echo "PKG_CONFIG_SYSROOT_DIR=${{ steps.msys2.outputs.msys2-location }}/clang64"
+        run: echo "PKG_CONFIG_SYSROOT_DIR=${{ steps.msys2.outputs.msys2-location }}/clang64" >> $GITHUB_ENV
 
       - name: Check PKG_CONFIG_SYSROOT_DIR
         run: echo $PKG_CONFIG_SYSROOT_DIR
