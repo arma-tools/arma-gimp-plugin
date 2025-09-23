@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2
         with:
-          msys2: clang64
+          msystem: clang64
           update: true
           pacboy: >-
             toolchain:p
@@ -65,12 +65,6 @@ jobs:
             pkgconf:p
             glib2:p
             gimp:p
-
-# ${{env.MINGW_TRIPLET}}ninja
-# ${{env.MINGW_TRIPLET}}clang
-# ${{env.MINGW_TRIPLET}}glib2
-# ${{env.MINGW_TRIPLET}}pkgconf
-# ${{env.MINGW_TRIPLET}}gimp
 
       - uses: actions/checkout@v4
         with:

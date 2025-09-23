@@ -18,11 +18,10 @@ target_link_libraries(arma-gimp-plugin ${GIMP_LIBRARIES})
 target_link_libraries(arma-gimp-plugin aff_cxx_rust)
 target_link_libraries(aff_cxx_rust PUBLIC ${GIMP_LIBRARIES})
 
-target_include_directories(arma-gimp-plugin PRIVATE aff_cxx_rust)
-
-if(WIN32 AND (NOT "$ENV{appdata}" STREQUAL ""))
-    file(TO_CMAKE_PATH "$ENV{appdata}/GIMP/2.10/plug-ins/arma-gimp-plugin.exe" GIMP_PLUGIN_DIR)
-    
+if(WIN32)
+    if(NOT "$ENV{appdata}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{appdata}/GIMP/2.10/plug-ins/arma-gimp-plugin.exe" GIMP_PLUGIN_DIR)
+    endif()
 else()
     file(TO_CMAKE_PATH "$ENV{HOME}/.config/GIMP/3.0/plug-ins/arma-gimp-plugin/arma-gimp-plugin" GIMP_PLUGIN_DIR)
 endif()
