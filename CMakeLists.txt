@@ -16,6 +16,7 @@ include_directories(arma-gimp-plugin ${GIMP_INCLUDE_DIRS})
 target_link_libraries(arma-gimp-plugin ${GIMP_LIBRARIES})
 
 target_link_libraries(arma-gimp-plugin aff_cxx_rust)
+target_link_libraries(aff_cxx_rust PUBLIC ${GIMP_LIBRARIES})
 
 target_include_directories(arma-gimp-plugin PRIVATE aff_cxx_rust)
 
