@@ -19,7 +19,7 @@ target_link_libraries(arma-gimp-plugin aff_cxx_rust)
 target_link_libraries(aff_cxx_rust PUBLIC ${GIMP_LIBRARIES})
 
 if(WIN32)
-    target_link_libraries(arma-gimp-plugin Bcrypt.lib)
+    target_link_libraries(arma-gimp-plugin Bcrypt.lib "-Wl,-subsystem,windows")
 endif()
 
 if(WIN32)
