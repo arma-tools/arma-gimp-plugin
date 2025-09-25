@@ -17,6 +17,7 @@ static GList *arma_gimp_plugin_query_procedures(GimpPlugIn *plug_in)
     GList *list = NULL;
     list = g_list_append(list, g_strdup(PLUG_IN_PROC));
     list = g_list_append(list, g_strdup(PROC_AGP_PAA_LOAD));
+    list = g_list_append(list, g_strdup(PROC_AGP_PAA_EXPORT));
     list = g_list_append(list, g_strdup(PROC_AGP_EDDS_LOAD));
 
     return list;
@@ -177,6 +178,86 @@ load_paa_file(GimpProcedure *procedure, GimpRunMode run_mode, GFile *file,
                      load_paa);
 }
 
+const static bool isPowerOfTwo(uint32_t x)
+{
+    return (x != 0) && ((x & (x - 1)) == 0);
+}
+
+static GimpValueArray *save_paa_file(
+    GimpProcedure *procedure,
+    GimpRunMode run_mode,
+    GimpImage *image,
+    GFile *file,
+    GimpExportOptions *options,
+    GimpMetadata *metadata,
+    GimpProcedureConfig *config,
+    gpointer run_data)
+{
+    auto drawables = gimp_image_list_layers(image);
+
+    auto drawable = (GimpDrawable *)drawables->data;
+
+    auto width = gimp_drawable_get_width(drawable);
+    auto height = gimp_drawable_get_height(drawable);
+
+    auto channelNumber = gimp_drawable_get_bpp(drawable);
+
+    const Babl *format;
+    if (channelNumber == 4)
+    {
+        format = babl_format("R'G'B'A u8");
+    }
+    else
+    {
+        format = babl_format("R'G'B' u8");
+    }
+
+    if (!isPowerOfTwo(width) || !isPowerOfTwo(height))
+    {
+        return gimp_procedure_new_return_values(
+            procedure,
+            GIMP_PDB_CALLING_ERROR,
+            g_error_new(GIMP_PLUG_IN_ERROR, EXPORT_AGP_ERROR, "Error during Paa Export:\nDimensions have to be a power of two (2^n)"));
+    }
+
+    auto data = std::vector<uint8_t>((size_t)width * (size_t)height * channelNumber);
+    GeglBuffer *buffer = gimp_drawable_get_buffer(drawable);
+    gegl_buffer_get(buffer, GEGL_RECTANGLE(0, 0, width, height),
+                    1, format, data.data(), GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
+    g_object_unref(buffer);
+
+    // Insert alpha bytes
+    if (channelNumber < 4)
+    {
+        auto temp = std::vector<uint8_t>();
+        temp.reserve((size_t)width * (size_t)height * 4);
+        for (size_t i = 0; i < data.size(); i += 3)
+        {
+            temp.push_back(data[i]);
+            temp.push_back(data[i + 1]);
+            temp.push_back(data[i + 2]);
+            temp.push_back(255);
+        }
+        data.clear();
+        data = temp;
+    }
+
+    try
+    {
+        write_paa_to_gfile((GFileWrapperCxx *)file, data, width, height);
+    }
+    catch (std::runtime_error &ex)
+    {
+        return gimp_procedure_new_return_values(
+            procedure, GIMP_PDB_EXECUTION_ERROR,
+            g_error_new(
+                GIMP_PLUG_IN_ERROR, EXPORT_AGP_ERROR, "%s",
+                std::format("Exception during Export: \n %s", ex.what()).c_str()));
+    }
+
+    return gimp_procedure_new_return_values(procedure, GIMP_PDB_SUCCESS, NULL);
+}
+
 static GimpProcedure *arma_gimp_plugin_create_procedure(GimpPlugIn *plug_in,
                                                         const gchar *name)
 {
@@ -200,6 +281,33 @@ static GimpProcedure *arma_gimp_plugin_create_procedure(GimpPlugIn *plug_in,
                                        "0,leshort,65281,0,leshort,65285");
         gimp_file_procedure_set_format_name(GIMP_FILE_PROCEDURE(procedure), "PAA");
         gimp_file_procedure_set_extensions(GIMP_FILE_PROCEDURE(procedure), "paa");
+    }
+    else if (g_strcmp0(name, PROC_AGP_PAA_EXPORT) == 0)
+    {
+        procedure = gimp_export_procedure_new(plug_in, name,
+                                              GIMP_PDB_PROC_TYPE_PLUGIN,
+                                              TRUE, save_paa_file, NULL, NULL);
+
+        gimp_procedure_set_image_types(procedure, "RGB*"); //, GRAY*");
+
+        gimp_procedure_set_menu_label(procedure, "PAA image");
+
+        gimp_procedure_set_documentation(procedure,
+                                         "Exports files in the PAA file format",
+                                         "This plug-in exports the image into PAA Texture files.",
+                                         NULL);
+        gimp_procedure_set_attribution(procedure, "Willard", "GPL2", "2025");
+
+        gimp_file_procedure_set_format_name(GIMP_FILE_PROCEDURE(procedure),
+                                            "PAA");
+        gimp_file_procedure_set_extensions(GIMP_FILE_PROCEDURE(procedure),
+                                           "paa");
+
+        gimp_export_procedure_set_capabilities(GIMP_EXPORT_PROCEDURE(procedure),
+                                               GIMP_EXPORT_CAN_HANDLE_RGB,
+                                               //|  GIMP_EXPORT_CAN_HANDLE_GRAY,
+                                               NULL,
+                                               NULL, NULL);
     }
     else if (g_strcmp0(name, PROC_AGP_EDDS_LOAD) == 0)
     {
