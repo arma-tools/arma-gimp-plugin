@@ -8,7 +8,7 @@ add_subdirectory(arma-file-formats-cxx)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GIMP REQUIRED gimp-3.0 gimpui-3.0)
+pkg_check_modules(GIMP REQUIRED gimp-3.0 gimpui-3.0 glib-2.0)
 
 add_executable(arma-gimp-plugin main.cpp)
 
@@ -17,11 +17,14 @@ target_link_libraries(arma-gimp-plugin ${GIMP_LIBRARIES})
 
 target_link_libraries(arma-gimp-plugin aff_cxx_rust)
 
-target_include_directories(arma-gimp-plugin PRIVATE aff_cxx_rust)
+if(WIN32)
+    target_link_libraries(arma-gimp-plugin Bcrypt.lib "-Wl,-subsystem,windows")
+endif()
 
-if(WIN32 AND (NOT "$ENV{appdata}" STREQUAL ""))
-    file(TO_CMAKE_PATH "$ENV{appdata}/GIMP/2.10/plug-ins/arma-gimp-plugin.exe" GIMP_PLUGIN_DIR)
-    
+if(WIN32)
+    if(NOT "$ENV{appdata}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{appdata}/GIMP/2.10/plug-ins/arma-gimp-plugin/arma-gimp-plugin.exe" GIMP_PLUGIN_DIR)
+    endif()
 else()
     file(TO_CMAKE_PATH "$ENV{HOME}/.config/GIMP/3.0/plug-ins/arma-gimp-plugin/arma-gimp-plugin" GIMP_PLUGIN_DIR)
 endif()
