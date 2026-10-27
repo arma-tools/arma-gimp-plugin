@@ -16,13 +16,15 @@ jobs:
   linux:
     name: Linux
     runs-on: ubuntu-latest
-    # Ubuntu only packages GIMP 2.10, Tumbleweed has GIMP 3.
+    # Ubuntu only packages GIMP 2.10, Tumbleweed has GIMP 3. Rust (with
+    # clippy) comes from Tumbleweed as well, rustup refuses to install in
+    # container jobs ($HOME is not root's home).
     container: opensuse/tumbleweed
     steps:
       - name: Install dependencies
         run: >
           zypper --non-interactive install --no-recommends
-          gcc git gzip tar curl pkgconf-pkg-config
+          gcc git gzip tar pkgconf-pkg-config rust cargo
           gimp gimp-devel gimp-plugin-python3
 
       - uses: actions/checkout@v4
@@ -33,10 +35,6 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/gimp-rs
           path: gimp-rs
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
 
       - uses: Swatinem/rust-cache@v2
         with:
