@@ -1,0 +1,16 @@
+[package]
+name = "arma-gimp-plugin"
+version = "0.1.0"
+description = "GIMP 3 plug-in to load and export the Arma texture formats PAA and EDDS"
+edition = "2024"
+license = "GPL-2.0-or-later"
+publish = false
+
+[dependencies]
+arma-file-formats = { git = "https://github.com/arma-tools/arma-file-formats-rs.git", branch = "main" }
+gimp = { path = "../gimp-rs/gimp" }
+gio = "0.22"
+glib = "0.22"
+
+[profile.release]
+lto = true
