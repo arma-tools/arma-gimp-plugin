@@ -27,11 +27,11 @@ jobs:
           gcc git gzip tar pkgconf-pkg-config rust cargo
           gimp gimp-devel gimp-plugin-python3
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: arma-gimp-plugin
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.repository_owner }}/gimp-rs
           path: gimp-rs
@@ -57,7 +57,7 @@ jobs:
         timeout-minutes: 20
         run: tests/run-gimp-tests.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: arma-gimp-plugin-linux-x86_64
           path: arma-gimp-plugin/target/release/arma-gimp-plugin
@@ -82,11 +82,11 @@ jobs:
             pkgconf:p
             rust:p
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: arma-gimp-plugin
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.repository_owner }}/gimp-rs
           path: gimp-rs
@@ -99,7 +99,7 @@ jobs:
         working-directory: arma-gimp-plugin
         run: cargo test
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: arma-gimp-plugin-windows-x86_64
           path: arma-gimp-plugin/target/release/arma-gimp-plugin.exe
