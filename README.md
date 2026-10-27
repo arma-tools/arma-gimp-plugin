@@ -35,7 +35,8 @@ tests/run-gimp-tests.sh
 ```
 
 runs the plug-in in a headless GIMP with a temporary profile and checks loading
-and exporting. The first run is slow while GIMP sets up the profile.
+and exporting. CI (`.github/workflows/build.yml`) builds on Linux and Windows
+and runs these tests on Linux.
 
 ## License
 

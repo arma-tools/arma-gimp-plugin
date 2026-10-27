@@ -2,7 +2,6 @@
 # Runs the plug-in in a headless GIMP with a temporary profile (the user's
 # GIMP configuration is not touched) and checks loading/exporting.
 #
-# The first run takes a while, GIMP queries all plug-ins of the new profile.
 # Set GIMP_TEST_DIR to reuse a profile.
 set -e
 cd "$(dirname "$0")/.."

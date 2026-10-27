@@ -1,0 +1,107 @@
+name: Build
+
+on:
+  push:
+    branches: [main, rust-port]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+# The plug-in depends on the gimp-rs bindings via `../gimp-rs`, so both
+# repositories are checked out next to each other.
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    # Ubuntu only packages GIMP 2.10, Tumbleweed has GIMP 3.
+    container: opensuse/tumbleweed
+    steps:
+      - name: Install dependencies
+        run: >
+          zypper --non-interactive install --no-recommends
+          gcc git gzip tar curl pkgconf-pkg-config
+          gimp gimp-devel gimp-plugin-python3
+
+      - uses: actions/checkout@v4
+        with:
+          path: arma-gimp-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/gimp-rs
+          path: gimp-rs
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: arma-gimp-plugin
+
+      - name: Build
+        working-directory: arma-gimp-plugin
+        run: cargo build --release
+
+      - name: Clippy
+        working-directory: arma-gimp-plugin
+        run: cargo clippy -- -D warnings
+
+      - name: Unit tests
+        working-directory: arma-gimp-plugin
+        run: cargo test
+
+      - name: GIMP integration tests
+        working-directory: arma-gimp-plugin
+        timeout-minutes: 20
+        run: tests/run-gimp-tests.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arma-gimp-plugin-linux-x86_64
+          path: arma-gimp-plugin/target/release/arma-gimp-plugin
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      # GIMP on Windows is built with MSYS2 (UCRT64), the plug-in links against
+      # the same libraries.
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git
+          pacboy: >-
+            gcc:p
+            gimp:p
+            pkgconf:p
+            rust:p
+
+      - uses: actions/checkout@v4
+        with:
+          path: arma-gimp-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/gimp-rs
+          path: gimp-rs
+
+      - name: Build
+        working-directory: arma-gimp-plugin
+        run: cargo build --release
+
+      - name: Unit tests
+        working-directory: arma-gimp-plugin
+        run: cargo test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arma-gimp-plugin-windows-x86_64
+          path: arma-gimp-plugin/target/release/arma-gimp-plugin.exe

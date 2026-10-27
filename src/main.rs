@@ -1,6 +1,9 @@
 //! GIMP 3 plug-in for the Arma texture formats: loads PAA (Real Virtuality)
 //! and EDDS (Enfusion) files and exports PAA files.
 
+// GIMP runs plug-ins in the background, without a console window.
+#![windows_subsystem = "windows"]
+
 mod export;
 mod load;
 
