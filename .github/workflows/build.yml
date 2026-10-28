@@ -64,7 +64,7 @@ jobs:
         working-directory: arma-gimp-plugin
         run: |
           mkdir -p dist/arma-gimp-plugin
-          cp target/release/arma-gimp-plugin dist/arma-gimp-plugin/
+          cp target/release/arma-gimp-plugin LICENSE dist/arma-gimp-plugin/
           tar -czf dist/arma-gimp-plugin-linux-x86_64.tar.gz -C dist arma-gimp-plugin
 
       - uses: actions/upload-artifact@v7
@@ -113,7 +113,7 @@ jobs:
         working-directory: arma-gimp-plugin
         run: |
           mkdir -p dist/arma-gimp-plugin
-          cp target/release/arma-gimp-plugin.exe dist/arma-gimp-plugin/
+          cp target/release/arma-gimp-plugin.exe LICENSE dist/arma-gimp-plugin/
           cd dist && zip -r arma-gimp-plugin-windows-x86_64.zip arma-gimp-plugin
 
       - uses: actions/upload-artifact@v7

@@ -54,4 +54,4 @@ and runs these tests on Linux.
 
 ## License
 
-GPL-2.0-or-later
+GPL-2.0-or-later, see [LICENSE](LICENSE).
