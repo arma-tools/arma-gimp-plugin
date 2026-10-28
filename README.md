@@ -21,6 +21,20 @@ this repository (`../gimp-rs`).
 builds the plug-in and installs it with `gimptool` into the user's plug-in
 folder. Restart GIMP afterwards.
 
+### From a release
+
+Download `arma-gimp-plugin-windows-x86_64.zip` or
+`arma-gimp-plugin-linux-x86_64.tar.gz` from the
+[releases](https://github.com/arma-tools/arma-gimp-plugin/releases) and extract
+it into GIMP's plug-ins folder (*Edit → Preferences → Folders → Plug-ins*), so
+that there is a `plug-ins/arma-gimp-plugin/` folder with the executable.
+
+## Releasing
+
+Pushing a tag `v*` (e.g. `git tag v0.2.0 && git push origin v0.2.0`) builds
+the plug-in on Linux and Windows and creates a GitHub release with both
+archives, listing the commits since the previous tag as release notes.
+
 ## Notes
 
 - GIMP 3.2 ships its own PAA loader (`file-paa-load`), which cannot read DXT1

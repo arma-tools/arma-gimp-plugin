@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [main, rust-port]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -57,10 +58,19 @@ jobs:
         timeout-minutes: 20
         run: tests/run-gimp-tests.sh
 
+      # The archive contains the plug-in folder for GIMP's plug-ins directory.
+      # tar keeps the executable bit, a zip artifact would not.
+      - name: Package
+        working-directory: arma-gimp-plugin
+        run: |
+          mkdir -p dist/arma-gimp-plugin
+          cp target/release/arma-gimp-plugin dist/arma-gimp-plugin/
+          tar -czf dist/arma-gimp-plugin-linux-x86_64.tar.gz -C dist arma-gimp-plugin
+
       - uses: actions/upload-artifact@v7
         with:
-          name: arma-gimp-plugin-linux-x86_64
-          path: arma-gimp-plugin/target/release/arma-gimp-plugin
+          path: arma-gimp-plugin/dist/arma-gimp-plugin-linux-x86_64.tar.gz
+          archive: false
 
   windows:
     name: Windows
@@ -75,7 +85,7 @@ jobs:
         with:
           msystem: UCRT64
           update: true
-          install: git
+          install: git zip
           pacboy: >-
             gcc:p
             gimp:p
@@ -99,7 +109,60 @@ jobs:
         working-directory: arma-gimp-plugin
         run: cargo test
 
+      - name: Package
+        working-directory: arma-gimp-plugin
+        run: |
+          mkdir -p dist/arma-gimp-plugin
+          cp target/release/arma-gimp-plugin.exe dist/arma-gimp-plugin/
+          cd dist && zip -r arma-gimp-plugin-windows-x86_64.zip arma-gimp-plugin
+
       - uses: actions/upload-artifact@v7
         with:
-          name: arma-gimp-plugin-windows-x86_64
-          path: arma-gimp-plugin/target/release/arma-gimp-plugin.exe
+          path: arma-gimp-plugin/dist/arma-gimp-plugin-windows-x86_64.zip
+          archive: false
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Full history and tags, for the commits since the previous tag.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: arma-gimp-plugin-*
+          path: dist
+          merge-multiple: true
+          # The artifacts are the release archives themselves, keep the zip.
+          skip-decompress: true
+
+      - name: Release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'v*' "$TAG^" 2>/dev/null || true)
+          range=${previous:+$previous..}$TAG
+          {
+            echo "## Changes"
+            echo
+            git log --no-merges --format='- %s (%h)' "$range"
+            if [ -n "$previous" ]; then
+              echo
+              echo "**Full changelog**: https://github.com/$GITHUB_REPOSITORY/compare/$previous...$TAG"
+            fi
+          } > notes.md
+          cat notes.md
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: >
+          gh release create "$TAG" dist/*
+          --verify-tag --title "$TAG" --notes-file notes.md
